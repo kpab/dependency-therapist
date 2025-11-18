@@ -1,5 +1,6 @@
 import * as semver from 'semver';
 import { Symptom, ProjectMetrics, Dependency } from '../types';
+import { AuditResult } from './security';
 
 /**
  * ゾンビパッケージ（非推奨または長期間更新なし）を検出
@@ -179,10 +180,60 @@ function detectAncientDependencies(metrics: ProjectMetrics): Symptom | null {
 }
 
 /**
+ * セキュリティ脆弱性を検出
+ */
+function detectSecurityVulnerabilities(
+  metrics: ProjectMetrics & { auditResult?: AuditResult }
+): Symptom | null {
+  if (!metrics.auditResult || metrics.auditResult.metadata.vulnerabilities.total === 0) {
+    return null;
+  }
+
+  const { critical, high, moderate, low, total } = metrics.auditResult.metadata.vulnerabilities;
+
+  let severity: 'critical' | 'high' | 'medium' | 'low' = 'low';
+  if (critical > 0) {
+    severity = 'critical';
+  } else if (high > 0) {
+    severity = 'high';
+  } else if (moderate > 0) {
+    severity = 'medium';
+  }
+
+  const affectedPackages = metrics.auditResult.vulnerabilities
+    .slice(0, 10)
+    .map(v => `${v.name} (${v.severity}: ${v.title})`);
+
+  const severityBreakdown = [];
+  if (critical > 0) severityBreakdown.push(`Critical: ${critical}`);
+  if (high > 0) severityBreakdown.push(`High: ${high}`);
+  if (moderate > 0) severityBreakdown.push(`Moderate: ${moderate}`);
+  if (low > 0) severityBreakdown.push(`Low: ${low}`);
+
+  return {
+    id: 'security-vulnerabilities',
+    name: 'セキュリティ脆弱性感染',
+    severity,
+    description: `${total}個のセキュリティ脆弱性が検出されました (${severityBreakdown.join(', ')})`,
+    affectedPackages,
+    remedy: [
+      'npm audit fix で自動修復を試行',
+      '重大な脆弱性は手動でアップデート',
+      'npm audit report で詳細を確認',
+      '修正できない場合は代替パッケージを検討',
+    ],
+    impact: 'セキュリティ侵害のリスク、データ漏洩の可能性',
+  };
+}
+
+/**
  * 症状を検出
  */
-export function detectSymptoms(metrics: ProjectMetrics): Symptom[] {
+export function detectSymptoms(
+  metrics: ProjectMetrics & { auditResult?: AuditResult }
+): Symptom[] {
   const symptoms: (Symptom | null)[] = [
+    detectSecurityVulnerabilities(metrics),
     detectZombiePackages(metrics),
     detectMassiveOutdated(metrics),
     detectDependencyObesity(metrics),

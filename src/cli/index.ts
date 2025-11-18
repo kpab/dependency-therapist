@@ -3,25 +3,29 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { createDiagnoseCommand } from './commands/diagnose';
+import { createHealCommand } from './commands/heal';
 
 const program = new Command();
 
 program
   .name('dependency-therapist')
   .description('🏥 AI-powered dependency health diagnostics for Node.js projects')
-  .version('0.1.0');
+  .version('0.2.0');
 
-// コマンドを追加
+// Add commands
 program.addCommand(createDiagnoseCommand());
+program.addCommand(createHealCommand());
 
-// デフォルトコマンド（引数なしで実行された場合）
+// Default command (when run without arguments)
 if (process.argv.length === 2) {
-  console.log(chalk.cyan.bold('\n🏥 Dependency Therapist へようこそ！\n'));
-  console.log('使い方:');
-  console.log('  $ dependency-therapist diagnose        プロジェクトを診断');
-  console.log('  $ dependency-therapist diagnose --help 詳細なヘルプ');
+  console.log(chalk.cyan.bold('\n🏥 Welcome to Dependency Therapist!\n'));
+  console.log('Usage:');
+  console.log('  $ dependency-therapist diagnose           Diagnose your project');
+  console.log('  $ dependency-therapist diagnose --html    Generate HTML report');
+  console.log('  $ dependency-therapist heal              Auto-fix issues');
+  console.log('  $ dependency-therapist heal --dry-run    Preview fixes');
   console.log('');
-  console.log('もっと詳しく: dependency-therapist --help');
+  console.log('More info: dependency-therapist --help');
   console.log('');
   process.exit(0);
 }

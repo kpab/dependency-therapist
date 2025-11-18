@@ -1,4 +1,5 @@
 import { HealthScore, ProjectMetrics, ScoreWeights } from '../types';
+import { AuditResult } from './security';
 
 /**
  * スコア計算の重み付け
@@ -46,15 +47,24 @@ function calculateFreshnessScore(metrics: ProjectMetrics): number {
 /**
  * セキュリティスコアを計算
  */
-function calculateSecurityScore(metrics: ProjectMetrics): number {
-  // Phase 1 では脆弱性チェックは未実装
-  // 非推奨パッケージをセキュリティリスクとして評価
+function calculateSecurityScore(
+  metrics: ProjectMetrics & { auditResult?: AuditResult }
+): number {
   if (metrics.totalDependencies === 0) {
     return 100;
   }
 
-  const deprecatedPenalty = (metrics.deprecatedCount / metrics.totalDependencies) * 30;
-  const vulnerabilityPenalty = metrics.vulnerabilities * 10;
+  const deprecatedPenalty = (metrics.deprecatedCount / metrics.totalDependencies) * 20;
+
+  // Use detailed audit data if available
+  let vulnerabilityPenalty = 0;
+  if (metrics.auditResult) {
+    const { critical, high, moderate, low } = metrics.auditResult.metadata.vulnerabilities;
+    vulnerabilityPenalty = critical * 25 + high * 15 + moderate * 5 + low * 2;
+  } else {
+    // Fallback to simple count
+    vulnerabilityPenalty = metrics.vulnerabilities * 10;
+  }
 
   const score = 100 - deprecatedPenalty - vulnerabilityPenalty;
   return clamp(score);
@@ -121,7 +131,7 @@ function calculatePerformanceScore(metrics: ProjectMetrics): number {
  * 総合健康スコアを計算
  */
 export function calculateHealthScore(
-  metrics: ProjectMetrics,
+  metrics: ProjectMetrics & { auditResult?: AuditResult },
   weights: ScoreWeights = DEFAULT_WEIGHTS
 ): HealthScore {
   const freshness = calculateFreshnessScore(metrics);

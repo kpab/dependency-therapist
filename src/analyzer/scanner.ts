@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import pacote from 'pacote';
 import { Dependency, ProjectMetrics } from '../types';
+import { runSecurityAudit, AuditResult } from './security';
 
 /**
  * package.json を読み込む
@@ -58,8 +59,9 @@ function calculateDaysSinceUpdate(manifest: any): number {
  * 依存関係をスキャンして情報を収集
  */
 export async function scanDependencies(
-  projectPath: string
-): Promise<ProjectMetrics> {
+  projectPath: string,
+  options: { skipAudit?: boolean } = {}
+): Promise<ProjectMetrics & { auditResult?: AuditResult }> {
   const packageJson = await loadPackageJson(projectPath);
 
   const dependencies: Dependency[] = [];
@@ -85,14 +87,36 @@ export async function scanDependencies(
         type: depType,
         deprecated: isDeprecated(manifest),
         lastUpdateDays: calculateDaysSinceUpdate(manifest),
-        vulnerabilities: 0, // Phase 2 で実装
+        vulnerabilities: 0,
       };
 
       dependencies.push(dep);
     }
   }
 
-  // メトリクスを計算
+  // Run security audit
+  let auditResult: AuditResult | undefined;
+  let totalVulnerabilities = 0;
+
+  if (!options.skipAudit) {
+    try {
+      auditResult = await runSecurityAudit(projectPath);
+      totalVulnerabilities = auditResult.metadata.vulnerabilities.total;
+
+      // Map vulnerabilities to dependencies
+      auditResult.vulnerabilities.forEach(vuln => {
+        const dep = dependencies.find(d => d.name === vuln.name);
+        if (dep) {
+          dep.vulnerabilities++;
+        }
+      });
+    } catch (error) {
+      // Audit failed, continue without it
+      console.warn('Security audit failed, continuing without vulnerability data');
+    }
+  }
+
+  // Calculate metrics
   const outdatedCount = dependencies.filter(
     d => semver.valid(d.version) && semver.valid(d.latest) && semver.lt(d.version, d.latest)
   ).length;
@@ -107,9 +131,10 @@ export async function scanDependencies(
     totalDependencies: dependencies.length,
     outdatedCount,
     deprecatedCount,
-    vulnerabilities: 0, // Phase 2 で実装
-    duplicates: 0, // Phase 2 で実装
+    vulnerabilities: totalVulnerabilities,
+    duplicates: 0, // TODO: Implement in future phase
     averageAge: Math.round(averageAge),
     dependencies,
+    auditResult,
   };
 }
