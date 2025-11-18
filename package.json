@@ -1,0 +1,57 @@
+{
+  "name": "dependency-therapist",
+  "version": "0.1.0",
+  "description": "🏥 AI-powered dependency health diagnostics for Node.js projects",
+  "keywords": [
+    "dependencies",
+    "health",
+    "diagnostics",
+    "npm",
+    "technical-debt",
+    "ai",
+    "analysis"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "dependency-therapist": "./dist/cli/index.js",
+    "dep-therapy": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "diagnose": "node ./dist/cli/index.js diagnose",
+    "prepare": "npm run build"
+  },
+  "files": [
+    "dist",
+    "data",
+    "README.md"
+  ],
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "ora": "^7.0.1",
+    "semver": "^7.5.4",
+    "pacote": "^17.0.4",
+    "inquirer": "^9.2.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/semver": "^7.5.6",
+    "typescript": "^5.3.2",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "ts-jest": "^29.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/dependency-therapist.git"
+  }
+}
