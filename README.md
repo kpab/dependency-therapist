@@ -1,195 +1,195 @@
 # 🏥 Dependency Therapist
 
-**あなたのプロジェクトは健康ですか？**
+**Is your project healthy?**
 
-Dependency Therapist は、Node.jsプロジェクトの依存関係の健康状態を診断し、技術的負債を可視化するAI駆動の分析ツールです。
+Dependency Therapist is an AI-powered analysis tool that diagnoses the health of Node.js project dependencies and visualizes technical debt.
 
-医療診断のメタファーを使い、依存関係の健康状態を分かりやすく可視化します。
+Using a medical diagnosis metaphor, it makes dependency health status easy to understand and visualize.
 
-## ✨ 特徴
+## ✨ Features
 
-- 🎯 **総合健康スコア**: プロジェクトの依存関係を0-100のスコアで評価
-- 🔍 **症状検出**: 問題のあるパッケージを自動検出
-- 💊 **処方箋提供**: 具体的な改善策を提案
-- 📊 **詳細分析**: 鮮度、セキュリティ、複雑度、メンテナンス性、パフォーマンスを個別評価
-- 🌈 **美しいレポート**: カラフルで読みやすいテキストレポート
-- 🚀 **CI/CD対応**: 閾値チェックとJSON出力
+- 🎯 **Overall Health Score**: Evaluate project dependencies with a 0-100 score
+- 🔍 **Symptom Detection**: Automatically detect problematic packages
+- 💊 **Prescriptions**: Suggest specific improvement strategies
+- 📊 **Detailed Analysis**: Individual evaluation of freshness, security, complexity, maintainability, and performance
+- 🌈 **Beautiful Reports**: Colorful and readable text reports
+- 🚀 **CI/CD Ready**: Threshold checking and JSON output
 
-## 📦 インストール
+## 📦 Installation
 
 ```bash
 npm install -g dependency-therapist
 ```
 
-または、npxで直接実行:
+Or run directly with npx:
 
 ```bash
 npx dependency-therapist diagnose
 ```
 
-## 🚀 使い方
+## 🚀 Usage
 
-### 基本的な診断
+### Basic Diagnosis
 
 ```bash
 dependency-therapist diagnose
 ```
 
-### オプション
+### Options
 
 ```bash
-# 特定のプロジェクトを診断
+# Diagnose a specific project
 dependency-therapist diagnose --path /path/to/project
 
-# シンプルなサマリーのみ表示
+# Show simple summary only
 dependency-therapist diagnose --simple
 
-# JSON形式で出力
+# Output in JSON format
 dependency-therapist diagnose --json
 ```
 
-### CI/CDでの使用
+### CI/CD Integration
 
 ```yaml
-# GitHub Actions の例
+# GitHub Actions example
 - name: Dependency Health Check
   run: |
     npx dependency-therapist diagnose --simple
 ```
 
-スコアが60未満の場合、終了コード1で終了します。
+Exits with code 1 if score is below 60.
 
-## 📊 出力例
+## 📊 Sample Output
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│ プロジェクト健康診断レポート                                         │
+│ Project Health Diagnosis Report                                    │
 │                                                                    │
-│ 総合健康スコア: 72/100 🟡 要注意                                    │
+│ Overall Health Score: 72/100 🟡 Needs Attention                   │
 │                                                                    │
-│ 📊 詳細スコア:                                                      │
-│ ├─ 鮮度スコア: 45/100 🔴 ████████░░░░░░░░░░░░                      │
-│ ├─ セキュリティ: 88/100 🟢 ██████████████████░░                    │
-│ ├─ 複雑度: 62/100 🟡 ████████████░░░░░░░░                          │
-│ ├─ メンテナンス性: 71/100 🟡 ██████████████░░░░░░                  │
-│ └─ パフォーマンス: 80/100 🟢 ████████████████░░░░                  │
+│ 📊 Detailed Scores:                                                │
+│ ├─ Freshness: 45/100 🔴 ████████░░░░░░░░░░░░                      │
+│ ├─ Security: 88/100 🟢 ██████████████████░░                       │
+│ ├─ Complexity: 62/100 🟡 ████████████░░░░░░░░                     │
+│ ├─ Maintainability: 71/100 🟡 ██████████████░░░░░░                │
+│ └─ Performance: 80/100 🟢 ████████████████░░░░                    │
 └────────────────────────────────────────────────────────────────────┘
 
-📋 サマリー:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-総依存関係数: 45
-古いパッケージ: 12
-非推奨パッケージ: 2
-平均年齢: 8ヶ月
-検出された症状: 3件
+📋 Summary:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Dependencies: 45
+Outdated Packages: 12
+Deprecated Packages: 2
+Average Age: 8 months
+Detected Symptoms: 3
 
-🏥 検出された症状:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏥 Detected Symptoms:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️  重症度: HIGH
-症状: "更新遅延症候群"
-説明: 12個のパッケージが古いバージョンです（うち3個はメジャーアップデート）
-処方箋:
-  1. npm outdated で全体を確認
-  2. 段階的にアップデートを実施
-  3. CHANGELOG を確認して破壊的変更をチェック
+⚠️  Severity: HIGH
+Symptom: "Update Delay Syndrome"
+Description: 12 packages are outdated (including 3 major updates)
+Prescription:
+  1. Check with npm outdated
+  2. Implement gradual updates
+  3. Review CHANGELOG for breaking changes
 ```
 
-## 🎯 スコアリング基準
+## 🎯 Scoring Criteria
 
-### 総合スコア
-- 🟢 **80-100**: 健康 - 良好な状態です
-- 🟡 **60-79**: 要注意 - 改善の余地があります
-- 🔴 **0-59**: 不健康 - 早急な対応が必要です
+### Overall Score
+- 🟢 **80-100**: Healthy - Good condition
+- 🟡 **60-79**: Needs Attention - Room for improvement
+- 🔴 **0-59**: Unhealthy - Urgent action required
 
-### 各項目の評価
+### Score Categories
 
-- **鮮度スコア**: パッケージの最新性を評価
-- **セキュリティ**: 非推奨パッケージとセキュリティリスク
-- **複雑度**: 依存関係の数と複雑さ
-- **メンテナンス性**: 保守のしやすさ
-- **パフォーマンス**: ビルドとランタイムへの影響
+- **Freshness**: Evaluates package recency
+- **Security**: Deprecated packages and security risks
+- **Complexity**: Number and complexity of dependencies
+- **Maintainability**: Ease of maintenance
+- **Performance**: Impact on build and runtime
 
-## 🔍 検出される症状
+## 🔍 Detected Symptoms
 
-| 症状 | 説明 |
-|------|------|
-| ゾンビパッケージ感染 | 非推奨または2年以上更新されていないパッケージ |
-| 更新遅延症候群 | 大量の古いパッケージが存在 |
-| 依存関係肥大症 | 依存関係が多すぎる（100個以上） |
-| バージョン不一致症候群 | 同じパッケージの異なるバージョンが混在 |
-| 老化症候群 | 依存関係の平均年齢が高すぎる |
+| Symptom | Description |
+|---------|-------------|
+| Zombie Package Infection | Deprecated or not updated for 2+ years |
+| Update Delay Syndrome | Large number of outdated packages |
+| Dependency Obesity | Too many dependencies (100+) |
+| Version Conflict Syndrome | Different versions of the same package |
+| Aging Syndrome | Average dependency age too high |
 
-## 📚 API使用例
+## 📚 API Usage Example
 
-プログラムから使用することもできます:
+You can also use it programmatically:
 
 ```typescript
 import { diagnose, generateReport } from 'dependency-therapist';
 
-// 診断を実行
+// Run diagnosis
 const result = await diagnose('/path/to/project');
 
-// レポートを生成
+// Generate report
 console.log(generateReport(result));
 
-// スコアにアクセス
+// Access scores
 console.log(`Overall Score: ${result.score.overall}`);
 console.log(`Symptoms: ${result.symptoms.length}`);
 ```
 
-## 🛠️ 開発
+## 🛠️ Development
 
 ```bash
-# 依存関係をインストール
+# Install dependencies
 npm install
 
-# ビルド
+# Build
 npm run build
 
-# テスト
+# Test
 npm test
 
-# 開発モード
+# Development mode
 npm run dev
 ```
 
-## 📈 ロードマップ
+## 📈 Roadmap
 
-### Phase 1 (MVP) - 完了 ✅
-- 基本的なスコアリング機能
-- シンプルなCLI
-- テキストベースのレポート
+### Phase 1 (MVP) - Completed ✅
+- Basic scoring functionality
+- Simple CLI
+- Text-based reports
 
-### Phase 2 - 計画中
-- セキュリティ脆弱性スキャン (npm audit統合)
-- HTMLレポート生成
-- 自動修復の基本機能
-- 詳細な依存関係グラフ
+### Phase 2 - Planned
+- Security vulnerability scanning (npm audit integration)
+- HTML report generation
+- Basic auto-fix functionality
+- Detailed dependency graph
 
-### Phase 3 - 計画中
-- AI推奨エンジン
-- インタラクティブな可視化
-- 破綻予測タイムライン
-- 継続的モニタリング
+### Phase 3 - Planned
+- AI recommendation engine
+- Interactive visualization
+- Failure prediction timeline
+- Continuous monitoring
 
-## 🤝 コントリビューション
+## 🤝 Contributing
 
-プルリクエストを歓迎します！大きな変更の場合は、まずissueを開いて変更内容を議論してください。
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
-## 📄 ライセンス
+## 📄 License
 
 MIT
 
-## 🙏 謝辞
+## 🙏 Acknowledgments
 
-このプロジェクトは以下のツールとライブラリに触発されています:
+This project is inspired by the following tools and libraries:
 - npm-check
 - depcheck
 - npm-outdated
 
 ---
 
-**もう依存関係で悩まない。** 🏥
+**Stop worrying about dependencies.** 🏥
 
-dependency-therapistは、あなたのプロジェクトの主治医として、24時間365日、依存関係の健康を見守ります。
+dependency-therapist serves as your project's primary physician, watching over your dependency health 24/7/365.
