@@ -26,7 +26,6 @@
   },
   "files": [
     "dist",
-    "data",
     "README.md"
   ],
   "dependencies": {
@@ -50,10 +49,14 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "author": "",
+  "author": "kpab",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/dependency-therapist.git"
+    "url": "git+https://github.com/kpab/dependency-therapist.git"
+  },
+  "homepage": "https://github.com/kpab/dependency-therapist#readme",
+  "bugs": {
+    "url": "https://github.com/kpab/dependency-therapist/issues"
   }
 }

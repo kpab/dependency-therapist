@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Skill(ui-ux-pro-max)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npm view:*)",
+      "Bash(npm whoami:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
