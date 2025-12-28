@@ -9,10 +9,13 @@ Using a medical diagnosis metaphor, it makes dependency health status easy to un
 ## ✨ Features
 
 - 🎯 **Overall Health Score**: Evaluate project dependencies with a 0-100 score
-- 🔍 **Symptom Detection**: Automatically detect problematic packages
+- 🔍 **Symptom Detection**: Automatically detect problematic packages (7 types)
 - 💊 **Prescriptions**: Suggest specific improvement strategies
 - 📊 **Detailed Analysis**: Individual evaluation of freshness, security, complexity, maintainability, and performance
-- 🌈 **Beautiful Reports**: Colorful and readable text reports
+- 🔒 **Security Scanning**: npm audit integration for vulnerability detection
+- 📈 **Terminal Charts**: Interactive ASCII charts and gauges
+- 🌐 **HTML Reports**: Beautiful, responsive HTML report generation
+- 🔧 **Auto-Fix**: Automatic dependency healing with backup
 - 🚀 **CI/CD Ready**: Threshold checking and JSON output
 
 ## 📦 Installation
@@ -46,6 +49,28 @@ dependency-therapist diagnose --simple
 
 # Output in JSON format
 dependency-therapist diagnose --json
+
+# Generate HTML report
+dependency-therapist diagnose --html report.html
+
+# Show interactive terminal charts
+dependency-therapist diagnose --charts
+```
+
+### Auto-Fix (Heal Command)
+
+```bash
+# Auto-fix dependencies
+dependency-therapist heal
+
+# Preview fixes without applying
+dependency-therapist heal --dry-run
+
+# Force fixes including breaking changes
+dependency-therapist heal --force
+
+# Skip confirmation prompt
+dependency-therapist heal --yes
 ```
 
 ### CI/CD Integration
@@ -114,6 +139,8 @@ Prescription:
 
 | Symptom | Description |
 |---------|-------------|
+| Security Vulnerability Infection | npm audit vulnerabilities detected |
+| Clone Infection | Duplicate packages with multiple versions |
 | Zombie Package Infection | Deprecated or not updated for 2+ years |
 | Update Delay Syndrome | Large number of outdated packages |
 | Dependency Obesity | Too many dependencies (100+) |
@@ -161,15 +188,15 @@ npm run dev
 - Simple CLI
 - Text-based reports
 
-### Phase 2 - Planned
+### Phase 2 - Completed ✅
 - Security vulnerability scanning (npm audit integration)
 - HTML report generation
-- Basic auto-fix functionality
-- Detailed dependency graph
+- Auto-fix functionality (heal command)
+- Duplicate package detection
 
-### Phase 3 - Planned
+### Phase 3 - In Progress 🚧
+- ✅ Interactive terminal visualization (charts & gauges)
 - AI recommendation engine
-- Interactive visualization
 - Failure prediction timeline
 - Continuous monitoring
 
