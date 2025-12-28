@@ -31,3 +31,5 @@ export { calculateHealthScore, getHealthStatus } from './analyzer/scorer';
 export { scanDependencies } from './analyzer/scanner';
 export { detectSymptoms } from './analyzer/symptoms';
 export { generateReport, generateSimpleSummary } from './utils/reporter';
+export { setLocale, getLocale, t } from './i18n';
+export type { Locale, TranslationKey } from './i18n';

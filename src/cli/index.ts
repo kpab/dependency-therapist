@@ -31,7 +31,7 @@ const program = new Command();
 program
   .name('dependency-therapist')
   .description(`🏥 ${t('cliDescription')}`)
-  .version('0.2.0')
+  .version('0.3.0')
   .option('-l, --lang <locale>', 'Language (en, ja)', detectLocale());
 
 // Add commands

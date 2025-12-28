@@ -1,6 +1,6 @@
 {
   "name": "dependency-therapist",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "🏥 AI-powered dependency health diagnostics for Node.js projects",
   "keywords": [
     "dependencies",
