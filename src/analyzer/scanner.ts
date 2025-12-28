@@ -2,8 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
 import pacote from 'pacote';
-import { Dependency, ProjectMetrics } from '../types';
+import { Dependency, Duplicate, ProjectMetrics } from '../types';
 import { runSecurityAudit, AuditResult } from './security';
+import { scanDuplicates } from './duplicates';
 
 /**
  * package.json を読み込む
@@ -116,6 +117,14 @@ export async function scanDependencies(
     }
   }
 
+  // Scan for duplicate packages
+  let duplicatesList: Duplicate[] = [];
+  try {
+    duplicatesList = await scanDuplicates(projectPath);
+  } catch (error) {
+    console.warn('Duplicate scan failed, continuing without duplicate data');
+  }
+
   // Calculate metrics
   const outdatedCount = dependencies.filter(
     d => semver.valid(d.version) && semver.valid(d.latest) && semver.lt(d.version, d.latest)
@@ -132,9 +141,10 @@ export async function scanDependencies(
     outdatedCount,
     deprecatedCount,
     vulnerabilities: totalVulnerabilities,
-    duplicates: 0, // TODO: Implement in future phase
+    duplicates: duplicatesList.length,
     averageAge: Math.round(averageAge),
     dependencies,
+    duplicatesList,
     auditResult,
   };
 }

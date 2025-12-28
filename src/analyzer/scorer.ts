@@ -1,4 +1,4 @@
-import { HealthScore, ProjectMetrics, ScoreWeights } from '../types';
+import { HealthScore, ProjectMetrics, ScoreWeights, Duplicate } from '../types';
 import { AuditResult } from './security';
 
 /**
@@ -73,7 +73,9 @@ function calculateSecurityScore(
 /**
  * 複雑度スコアを計算
  */
-function calculateComplexityScore(metrics: ProjectMetrics): number {
+function calculateComplexityScore(
+  metrics: ProjectMetrics & { duplicatesList?: Duplicate[] }
+): number {
   // 依存関係の数に基づく複雑度
   // 0-20: 優秀, 21-50: 良好, 51-100: 普通, 101+: 複雑
   let score = 100;
@@ -88,6 +90,13 @@ function calculateComplexityScore(metrics: ProjectMetrics): number {
 
   if (metrics.totalDependencies > 100) {
     score -= (metrics.totalDependencies - 100) * 0.2;
+  }
+
+  // 重複パッケージによるペナルティ
+  const duplicatesList = metrics.duplicatesList || [];
+  if (duplicatesList.length > 0) {
+    const duplicatePenalty = Math.min(20, duplicatesList.length * 2);
+    score -= duplicatePenalty;
   }
 
   return clamp(score);
@@ -131,7 +140,7 @@ function calculatePerformanceScore(metrics: ProjectMetrics): number {
  * 総合健康スコアを計算
  */
 export function calculateHealthScore(
-  metrics: ProjectMetrics & { auditResult?: AuditResult },
+  metrics: ProjectMetrics & { auditResult?: AuditResult; duplicatesList?: Duplicate[] },
   weights: ScoreWeights = DEFAULT_WEIGHTS
 ): HealthScore {
   const freshness = calculateFreshnessScore(metrics);

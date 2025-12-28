@@ -1,6 +1,47 @@
 import * as semver from 'semver';
-import { Symptom, ProjectMetrics, Dependency } from '../types';
+import { Symptom, ProjectMetrics, Dependency, Duplicate } from '../types';
 import { AuditResult } from './security';
+
+/**
+ * 重複パッケージを検出
+ */
+function detectDuplicatePackages(
+  metrics: ProjectMetrics & { duplicatesList?: Duplicate[] }
+): Symptom | null {
+  const duplicatesList = metrics.duplicatesList || [];
+
+  if (duplicatesList.length === 0) {
+    return null;
+  }
+
+  const totalDuplicateInstances = duplicatesList.reduce(
+    (sum, dup) => sum + (dup.count - 1),
+    0
+  );
+
+  const severity =
+    duplicatesList.length > 5 || totalDuplicateInstances > 20
+      ? 'high'
+      : 'medium';
+
+  const affectedPackages = duplicatesList
+    .slice(0, 10)
+    .map(dup => `${dup.name} (${dup.count}x: ${dup.versions.join(', ')})`);
+
+  return {
+    id: 'duplicate-packages',
+    name: 'クローン感染',
+    severity,
+    description: `${duplicatesList.length}個のパッケージが重複して複数バージョンインストールされています`,
+    affectedPackages,
+    remedy: [
+      'npm dedupe を実行してインストールを最適化',
+      '同じパッケージの異なるバージョンを統一',
+      'package-lock.json を削除して npm install で再生成',
+    ],
+    impact: 'バンドルサイズの増大、メモリ使用量増加、インストール時間延長',
+  };
+}
 
 /**
  * ゾンビパッケージ（非推奨または長期間更新なし）を検出
@@ -230,10 +271,11 @@ function detectSecurityVulnerabilities(
  * 症状を検出
  */
 export function detectSymptoms(
-  metrics: ProjectMetrics & { auditResult?: AuditResult }
+  metrics: ProjectMetrics & { auditResult?: AuditResult; duplicatesList?: Duplicate[] }
 ): Symptom[] {
   const symptoms: (Symptom | null)[] = [
     detectSecurityVulnerabilities(metrics),
+    detectDuplicatePackages(metrics),
     detectZombiePackages(metrics),
     detectMassiveOutdated(metrics),
     detectDependencyObesity(metrics),

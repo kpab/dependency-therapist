@@ -35,6 +35,7 @@ export interface ProjectMetrics {
   duplicates: number;
   averageAge: number;
   dependencies: Dependency[];
+  duplicatesList?: Duplicate[];
 }
 
 /**
@@ -75,4 +76,22 @@ export interface ScoreWeights {
   security: number;
   complexity: number;
   duplicates: number;
+}
+
+/**
+ * 重複パッケージのインスタンス情報
+ */
+export interface DuplicateInstance {
+  version: string;
+  path: string;
+}
+
+/**
+ * 重複パッケージ情報
+ */
+export interface Duplicate {
+  name: string;
+  versions: string[];
+  count: number;
+  instances: DuplicateInstance[];
 }
