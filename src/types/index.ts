@@ -71,11 +71,11 @@ export interface DiagnosisResult {
  * スコア重み付け設定
  */
 export interface ScoreWeights {
-  outdated: number;
-  deprecated: number;
+  freshness: number;
   security: number;
   complexity: number;
-  duplicates: number;
+  maintainability: number;
+  performance: number;
 }
 
 /**

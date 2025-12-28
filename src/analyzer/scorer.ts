@@ -5,11 +5,11 @@ import { AuditResult } from './security';
  * スコア計算の重み付け
  */
 const DEFAULT_WEIGHTS: ScoreWeights = {
-  outdated: 0.25,
-  deprecated: 0.30,
+  freshness: 0.25,
   security: 0.20,
   complexity: 0.15,
-  duplicates: 0.10,
+  maintainability: 0.30,
+  performance: 0.10,
 };
 
 /**
@@ -151,11 +151,11 @@ export function calculateHealthScore(
 
   // 重み付き平均で総合スコアを計算
   const overall = Math.round(
-    freshness * weights.outdated +
+    freshness * weights.freshness +
     security * weights.security +
     complexity * weights.complexity +
-    maintainability * weights.deprecated +
-    performance * weights.duplicates
+    maintainability * weights.maintainability +
+    performance * weights.performance
   );
 
   return {
