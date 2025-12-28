@@ -16,6 +16,7 @@ Using a medical diagnosis metaphor, it makes dependency health status easy to un
 - 📈 **Terminal Charts**: Interactive ASCII charts and gauges
 - 🌐 **HTML Reports**: Beautiful, responsive HTML report generation
 - 🔧 **Auto-Fix**: Automatic dependency healing with backup
+- 🌍 **i18n Support**: English and Japanese language support
 - 🚀 **CI/CD Ready**: Threshold checking and JSON output
 
 ## 📦 Installation
@@ -55,6 +56,24 @@ dependency-therapist diagnose --html report.html
 
 # Show interactive terminal charts
 dependency-therapist diagnose --charts
+
+# Use Japanese language
+dependency-therapist diagnose --lang ja
+
+# Use English language
+dependency-therapist diagnose --lang en
+```
+
+### Language Support
+
+The CLI supports English and Japanese. Language is detected automatically from your system locale (`LANG` environment variable), or you can specify it explicitly:
+
+```bash
+# Japanese output
+dependency-therapist diagnose -l ja
+
+# English output
+dependency-therapist heal --lang en --dry-run
 ```
 
 ### Auto-Fix (Heal Command)
@@ -152,7 +171,10 @@ Prescription:
 You can also use it programmatically:
 
 ```typescript
-import { diagnose, generateReport } from 'dependency-therapist';
+import { diagnose, generateReport, setLocale } from 'dependency-therapist';
+
+// Set language (optional - defaults to 'en')
+setLocale('ja'); // or 'en'
 
 // Run diagnosis
 const result = await diagnose('/path/to/project');
@@ -196,6 +218,7 @@ npm run dev
 
 ### Phase 3 - In Progress 🚧
 - ✅ Interactive terminal visualization (charts & gauges)
+- ✅ Internationalization (English/Japanese)
 - AI recommendation engine
 - Failure prediction timeline
 - Continuous monitoring
