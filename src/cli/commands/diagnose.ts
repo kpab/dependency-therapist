@@ -5,6 +5,7 @@ import * as path from 'path';
 import { diagnose } from '../../index';
 import { generateReport, generateSimpleSummary } from '../../utils/reporter';
 import { generateHTMLReport } from '../../visualizer/html-report';
+import { generateCharts } from '../../visualizer/terminal-charts';
 
 export function createDiagnoseCommand(): Command {
   const command = new Command('diagnose');
@@ -15,6 +16,7 @@ export function createDiagnoseCommand(): Command {
     .option('-s, --simple', 'Show simple summary only', false)
     .option('--json', 'Output in JSON format', false)
     .option('--html <output>', 'Generate HTML report (e.g., --html report.html)', '')
+    .option('--charts', 'Show interactive terminal charts', false)
     .action(async (options) => {
       const spinner = ora('Diagnosing dependencies...').start();
 
@@ -37,9 +39,15 @@ export function createDiagnoseCommand(): Command {
           console.log(JSON.stringify(result, null, 2));
         } else if (options.simple) {
           console.log(generateSimpleSummary(result));
+          if (options.charts) {
+            console.log(generateCharts(result.score, result.metrics, result.symptoms));
+          }
         } else if (!options.html) {
           // Only show full report if not generating HTML
           console.log(generateReport(result));
+          if (options.charts) {
+            console.log(generateCharts(result.score, result.metrics, result.symptoms));
+          }
         }
 
         // Exit with code 1 if health score is low
