@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { DiagnosisResult, HealthScore, Symptom } from '../types';
 import { getHealthStatus } from '../analyzer/scorer';
+import { t } from '../i18n';
 
 /**
  * ボックスを描画
@@ -40,19 +41,19 @@ function generateScoreReport(score: HealthScore): string {
   const statusColor = status.color === 'green' ? chalk.green : status.color === 'yellow' ? chalk.yellow : chalk.red;
 
   const lines = [
-    chalk.bold('プロジェクト健康診断レポート'),
+    chalk.bold(t('projectHealthReport')),
     '',
-    `総合健康スコア: ${statusColor.bold(score.overall + '/100')} ${status.emoji} ${statusColor(status.label)}`,
+    `${t('overallHealthScore')}: ${statusColor.bold(score.overall + '/100')} ${status.emoji} ${statusColor(status.label)}`,
     '',
-    chalk.bold('📊 詳細スコア:'),
+    chalk.bold(`📊 ${t('detailedScores')}:`),
   ];
 
   const scores = [
-    { label: '鮮度スコア', value: score.freshness },
-    { label: 'セキュリティ', value: score.security },
-    { label: '複雑度', value: score.complexity },
-    { label: 'メンテナンス性', value: score.maintainability },
-    { label: 'パフォーマンス', value: score.performance },
+    { label: t('freshness'), value: score.freshness },
+    { label: t('security'), value: score.security },
+    { label: t('complexity'), value: score.complexity },
+    { label: t('maintainability'), value: score.maintainability },
+    { label: t('performance'), value: score.performance },
   ];
 
   scores.forEach(({ label, value }) => {
@@ -69,10 +70,10 @@ function generateScoreReport(score: HealthScore): string {
  */
 function generateSymptomsReport(symptoms: Symptom[]): string {
   if (symptoms.length === 0) {
-    return chalk.green('\n✅ 症状は検出されませんでした。プロジェクトは健康です！\n');
+    return chalk.green(`\n✅ ${t('noSymptomsDetected')}\n`);
   }
 
-  const lines = ['\n🏥 検出された症状:', '━'.repeat(60), ''];
+  const lines = [`\n🏥 ${t('symptomsDetected')}:`, '━'.repeat(60), ''];
 
   symptoms.forEach((symptom, index) => {
     const severityEmoji = {
@@ -89,26 +90,26 @@ function generateSymptomsReport(symptoms: Symptom[]): string {
       low: 'LOW',
     }[symptom.severity];
 
-    lines.push(chalk.bold(`${severityEmoji} 重症度: ${severityLabel}`));
-    lines.push(chalk.bold(`症状: "${symptom.name}"`));
-    lines.push(`説明: ${symptom.description}`);
+    lines.push(chalk.bold(`${severityEmoji} ${t('severity')}: ${severityLabel}`));
+    lines.push(chalk.bold(`${t('symptom')}: "${symptom.name}"`));
+    lines.push(`${t('description')}: ${symptom.description}`);
 
     if (symptom.affectedPackages.length > 0) {
-      lines.push(chalk.gray('影響パッケージ:'));
+      lines.push(chalk.gray(`${t('affectedPackages')}:`));
       symptom.affectedPackages.slice(0, 5).forEach(pkg => {
         lines.push(chalk.gray(`  - ${pkg}`));
       });
       if (symptom.affectedPackages.length > 5) {
-        lines.push(chalk.gray(`  ... 他${symptom.affectedPackages.length - 5}件`));
+        lines.push(chalk.gray(`  ... ${t('andMore', { count: symptom.affectedPackages.length - 5 })}`));
       }
     }
 
-    lines.push(chalk.cyan('処方箋:'));
+    lines.push(chalk.cyan(`${t('prescription')}:`));
     symptom.remedy.forEach((remedy, i) => {
       lines.push(chalk.cyan(`  ${i + 1}. ${remedy}`));
     });
 
-    lines.push(chalk.yellow(`影響: ${symptom.impact}`));
+    lines.push(chalk.yellow(`${t('impact')}: ${symptom.impact}`));
 
     if (index < symptoms.length - 1) {
       lines.push('');
@@ -125,13 +126,13 @@ function generateSummary(result: DiagnosisResult): string {
   const { metrics, symptoms } = result;
 
   const lines = [
-    '\n📋 サマリー:',
+    `\n📋 ${t('summary')}:`,
     '━'.repeat(60),
-    `総依存関係数: ${metrics.totalDependencies}`,
-    `古いパッケージ: ${metrics.outdatedCount}`,
-    `非推奨パッケージ: ${metrics.deprecatedCount}`,
-    `平均年齢: ${Math.round(metrics.averageAge / 30)}ヶ月`,
-    `検出された症状: ${symptoms.length}件`,
+    `${t('totalDependencies')}: ${metrics.totalDependencies}`,
+    `${t('outdatedPackages')}: ${metrics.outdatedCount}`,
+    `${t('deprecatedPackages')}: ${metrics.deprecatedCount}`,
+    `${t('averageAge')}: ${Math.round(metrics.averageAge / 30)}${t('months')}`,
+    `${t('detectedSymptoms')}: ${symptoms.length}`,
     '',
   ];
 
@@ -145,36 +146,36 @@ function generateRecommendations(result: DiagnosisResult): string {
   const { score, symptoms } = result;
 
   if (score.overall >= 80 && symptoms.length === 0) {
-    return chalk.green('\n✨ 推奨アクション: なし。プロジェクトは健康な状態です！\n');
+    return chalk.green(`\n✨ ${t('noRecommendations')}\n`);
   }
 
-  const lines = ['\n💡 推奨アクション:', '━'.repeat(60), ''];
+  const lines = [`\n💡 ${t('recommendations')}:`, '━'.repeat(60), ''];
 
   if (score.freshness < 60) {
-    lines.push('📅 優先度 HIGH:');
-    lines.push('  - npm update で依存関係を更新');
-    lines.push('  - 非推奨パッケージの代替品を調査');
+    lines.push(`📅 ${t('priorityHigh')}:`);
+    lines.push(`  - ${t('updateDeps')}`);
+    lines.push(`  - ${t('investigateAlternatives')}`);
     lines.push('');
   }
 
   if (score.security < 70) {
-    lines.push('🔒 優先度 HIGH:');
-    lines.push('  - npm audit でセキュリティチェック');
-    lines.push('  - npm audit fix で自動修復を試行');
+    lines.push(`🔒 ${t('priorityHigh')}:`);
+    lines.push(`  - ${t('runAudit')}`);
+    lines.push(`  - ${t('runAuditFix')}`);
     lines.push('');
   }
 
   if (score.complexity < 70) {
-    lines.push('🧹 優先度 MEDIUM:');
-    lines.push('  - depcheck で未使用パッケージを検出');
-    lines.push('  - 不要な依存関係を削除');
+    lines.push(`🧹 ${t('priorityMedium')}:`);
+    lines.push(`  - ${t('useDepcheck')}`);
+    lines.push(`  - ${t('removeUnused')}`);
     lines.push('');
   }
 
-  lines.push(chalk.cyan('🤖 次のステップ:'));
-  lines.push(chalk.cyan('  1. 定期的な依存関係レビューをスケジュール'));
-  lines.push(chalk.cyan('  2. Renovate や Dependabot の導入を検討'));
-  lines.push(chalk.cyan('  3. CI/CD に dependency-therapist を統合'));
+  lines.push(chalk.cyan(`🤖 ${t('nextSteps')}:`));
+  lines.push(chalk.cyan(`  1. ${t('scheduleReview')}`));
+  lines.push(chalk.cyan(`  2. ${t('introduceAutomation')}`));
+  lines.push(chalk.cyan(`  3. ${t('integrateCICD')}`));
   lines.push('');
 
   return lines.join('\n');
@@ -190,8 +191,8 @@ export function generateReport(result: DiagnosisResult): string {
     generateSummary(result),
     generateSymptomsReport(result.symptoms),
     generateRecommendations(result),
-    chalk.gray(`\n診断日時: ${result.timestamp.toLocaleString('ja-JP')}`),
-    chalk.gray(`プロジェクトパス: ${result.projectPath}\n`),
+    chalk.gray(`\n${t('diagnosisDate')}: ${result.timestamp.toLocaleString()}`),
+    chalk.gray(`${t('projectPath')}: ${result.projectPath}\n`),
   ];
 
   return parts.join('\n');

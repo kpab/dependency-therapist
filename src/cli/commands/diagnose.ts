@@ -6,6 +6,7 @@ import { diagnose } from '../../index';
 import { generateReport, generateSimpleSummary } from '../../utils/reporter';
 import { generateHTMLReport } from '../../visualizer/html-report';
 import { generateCharts } from '../../visualizer/terminal-charts';
+import { t } from '../../i18n';
 
 export function createDiagnoseCommand(): Command {
   const command = new Command('diagnose');
@@ -18,11 +19,11 @@ export function createDiagnoseCommand(): Command {
     .option('--html <output>', 'Generate HTML report (e.g., --html report.html)', '')
     .option('--charts', 'Show interactive terminal charts', false)
     .action(async (options) => {
-      const spinner = ora('Diagnosing dependencies...').start();
+      const spinner = ora(t('diagnosing')).start();
 
       try {
         const result = await diagnose(options.path);
-        spinner.succeed('Diagnosis completed');
+        spinner.succeed(t('diagnosisCompleted'));
 
         // Generate HTML report if requested
         if (options.html) {
@@ -31,7 +32,7 @@ export function createDiagnoseCommand(): Command {
             : path.join(process.cwd(), options.html);
 
           await generateHTMLReport(result, outputPath);
-          console.log(chalk.green(`\n✅ HTML report generated: ${outputPath}\n`));
+          console.log(chalk.green(`\n✅ ${t('htmlReportGenerated')}: ${outputPath}\n`));
         }
 
         // Show console output
@@ -55,7 +56,7 @@ export function createDiagnoseCommand(): Command {
           process.exit(1);
         }
       } catch (error) {
-        spinner.fail('Diagnosis failed');
+        spinner.fail(t('diagnosisFailed'));
         console.error(chalk.red((error as Error).message));
         process.exit(1);
       }

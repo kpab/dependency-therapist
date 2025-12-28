@@ -1,9 +1,10 @@
 import * as semver from 'semver';
 import { Symptom, ProjectMetrics, Dependency, Duplicate } from '../types';
 import { AuditResult } from './security';
+import { t } from '../i18n';
 
 /**
- * 重複パッケージを検出
+ * Detect duplicate packages
  */
 function detectDuplicatePackages(
   metrics: ProjectMetrics & { duplicatesList?: Duplicate[] }
@@ -30,25 +31,25 @@ function detectDuplicatePackages(
 
   return {
     id: 'duplicate-packages',
-    name: 'クローン感染',
+    name: t('symptom.duplicate-packages'),
     severity,
-    description: `${duplicatesList.length}個のパッケージが重複して複数バージョンインストールされています`,
+    description: t('symptom.duplicate-packages.desc', { count: duplicatesList.length }),
     affectedPackages,
     remedy: [
-      'npm dedupe を実行してインストールを最適化',
-      '同じパッケージの異なるバージョンを統一',
-      'package-lock.json を削除して npm install で再生成',
+      t('remedy.dedupe'),
+      t('remedy.unify-versions'),
+      t('remedy.regenerate-lock'),
     ],
-    impact: 'バンドルサイズの増大、メモリ使用量増加、インストール時間延長',
+    impact: t('impact.duplicate'),
   };
 }
 
 /**
- * ゾンビパッケージ（非推奨または長期間更新なし）を検出
+ * Detect zombie packages (deprecated or not updated for a long time)
  */
 function detectZombiePackages(metrics: ProjectMetrics): Symptom | null {
   const zombiePackages = metrics.dependencies.filter(
-    dep => dep.deprecated || dep.lastUpdateDays > 730 // 2年以上更新なし
+    dep => dep.deprecated || dep.lastUpdateDays > 730 // No update for 2+ years
   );
 
   if (zombiePackages.length === 0) {
@@ -62,21 +63,21 @@ function detectZombiePackages(metrics: ProjectMetrics): Symptom | null {
 
   return {
     id: 'zombie-packages',
-    name: 'ゾンビパッケージ感染',
+    name: t('symptom.zombie-packages'),
     severity,
-    description: `${zombiePackages.length}個の非推奨または長期間更新されていないパッケージが検出されました`,
+    description: t('symptom.zombie-packages.desc', { count: zombiePackages.length }),
     affectedPackages,
     remedy: [
-      '各パッケージの代替品を調査',
-      '最新の推奨パッケージへの移行計画を立てる',
-      'npm deprecate コマンドで詳細を確認',
+      t('remedy.find-alternatives'),
+      t('remedy.plan-migration'),
+      t('remedy.check-deprecate'),
     ],
-    impact: 'セキュリティリスクとメンテナンス困難',
+    impact: t('impact.zombie'),
   };
 }
 
 /**
- * 大量の古いパッケージを検出
+ * Detect massive outdated packages
  */
 function detectMassiveOutdated(metrics: ProjectMetrics): Symptom | null {
   const outdatedPackages = metrics.dependencies.filter(dep => {
@@ -107,22 +108,25 @@ function detectMassiveOutdated(metrics: ProjectMetrics): Symptom | null {
 
   return {
     id: 'massive-outdated',
-    name: '更新遅延症候群',
+    name: t('symptom.massive-outdated'),
     severity,
-    description: `${outdatedPackages.length}個のパッケージが古いバージョンです（うち${majorUpdates.length}個はメジャーアップデート）`,
+    description: t('symptom.massive-outdated.desc', {
+      count: outdatedPackages.length,
+      major: majorUpdates.length,
+    }),
     affectedPackages,
     remedy: [
-      'npm outdated で全体を確認',
-      '段階的にアップデートを実施',
-      'CHANGELOG を確認して破壊的変更をチェック',
-      'テストを実行して動作確認',
+      t('remedy.check-outdated'),
+      t('remedy.gradual-update'),
+      t('remedy.check-changelog'),
+      t('remedy.run-tests'),
     ],
-    impact: 'セキュリティパッチの未適用、新機能の利用不可',
+    impact: t('impact.outdated'),
   };
 }
 
 /**
- * 依存関係の肥大化を検出
+ * Detect dependency obesity
  */
 function detectDependencyObesity(metrics: ProjectMetrics): Symptom | null {
   const threshold = 100;
@@ -135,34 +139,34 @@ function detectDependencyObesity(metrics: ProjectMetrics): Symptom | null {
 
   return {
     id: 'dependency-obesity',
-    name: '依存関係肥大症',
+    name: t('symptom.dependency-obesity'),
     severity,
-    description: `依存関係が${metrics.totalDependencies}個と多すぎます`,
-    affectedPackages: [`総数: ${metrics.totalDependencies}個`],
+    description: t('symptom.dependency-obesity.desc', { count: metrics.totalDependencies }),
+    affectedPackages: [`${t('totalDependencies')}: ${metrics.totalDependencies}`],
     remedy: [
-      '本当に必要な依存関係かレビュー',
-      '使用されていないパッケージを削除',
-      'depcheck ツールで未使用パッケージを検出',
-      '類似機能のパッケージを統合',
+      t('remedy.review-deps'),
+      t('remedy.remove-unused'),
+      t('remedy.use-depcheck'),
+      t('remedy.consolidate'),
     ],
-    impact: 'ビルド時間の増加、セキュリティリスクの増大、メンテナンスコストの上昇',
+    impact: t('impact.obesity'),
   };
 }
 
 /**
- * バージョン不一致を検出（同じパッケージの異なるバージョン）
+ * Detect version conflicts (different versions of the same package)
  */
 function detectVersionConflicts(metrics: ProjectMetrics): Symptom | null {
   const packageNames = new Map<string, Dependency[]>();
 
-  // パッケージ名でグループ化
+  // Group by package name
   metrics.dependencies.forEach(dep => {
     const existing = packageNames.get(dep.name) || [];
     existing.push(dep);
     packageNames.set(dep.name, existing);
   });
 
-  // 異なるバージョンを持つパッケージを検出
+  // Detect packages with different versions
   const conflicts: string[] = [];
   packageNames.forEach((deps, name) => {
     if (deps.length > 1) {
@@ -177,21 +181,21 @@ function detectVersionConflicts(metrics: ProjectMetrics): Symptom | null {
 
   return {
     id: 'version-conflicts',
-    name: 'バージョン不一致症候群',
+    name: t('symptom.version-conflicts'),
     severity: 'medium',
-    description: `${conflicts.length}個のパッケージで異なるバージョンが指定されています`,
+    description: t('symptom.version-conflicts.desc', { count: conflicts.length }),
     affectedPackages: conflicts,
     remedy: [
-      'package.json でバージョンを統一',
-      'npm dedupe を実行',
-      'package-lock.json を削除して再インストール',
+      t('remedy.unify-packagejson'),
+      t('remedy.dedupe'),
+      t('remedy.regenerate-lock'),
     ],
-    impact: 'ビルドエラーのリスク、予期しない動作',
+    impact: t('impact.conflicts'),
   };
 }
 
 /**
- * プロジェクトの平均年齢が高すぎる
+ * Detect ancient dependencies (average age too high)
  */
 function detectAncientDependencies(metrics: ProjectMetrics): Symptom | null {
   if (metrics.averageAge < 365) {
@@ -203,25 +207,25 @@ function detectAncientDependencies(metrics: ProjectMetrics): Symptom | null {
     .filter(d => d.lastUpdateDays > 365)
     .sort((a, b) => b.lastUpdateDays - a.lastUpdateDays)
     .slice(0, 5)
-    .map(p => `${p.name} (${Math.round(p.lastUpdateDays / 365)}年前)`);
+    .map(p => `${p.name} (${t('age.yearsAgo', { years: Math.round(p.lastUpdateDays / 365) })})`);
 
   return {
     id: 'ancient-dependencies',
-    name: '老化症候群',
+    name: t('symptom.ancient-dependencies'),
     severity,
-    description: `依存関係の平均年齢が${Math.round(metrics.averageAge / 365)}年です`,
+    description: t('symptom.ancient-dependencies.desc', { years: Math.round(metrics.averageAge / 365) }),
     affectedPackages: oldestPackages,
     remedy: [
-      '定期的なアップデート計画の策定',
-      '四半期ごとの依存関係レビュー',
-      'Renovate や Dependabot の導入',
+      t('remedy.schedule-updates'),
+      t('remedy.quarterly-review'),
+      t('remedy.use-renovate'),
     ],
-    impact: '技術的負債の蓄積、セキュリティリスク',
+    impact: t('impact.ancient'),
   };
 }
 
 /**
- * セキュリティ脆弱性を検出
+ * Detect security vulnerabilities
  */
 function detectSecurityVulnerabilities(
   metrics: ProjectMetrics & { auditResult?: AuditResult }
@@ -253,22 +257,25 @@ function detectSecurityVulnerabilities(
 
   return {
     id: 'security-vulnerabilities',
-    name: 'セキュリティ脆弱性感染',
+    name: t('symptom.security-vulnerabilities'),
     severity,
-    description: `${total}個のセキュリティ脆弱性が検出されました (${severityBreakdown.join(', ')})`,
+    description: t('symptom.security-vulnerabilities.desc', {
+      total,
+      breakdown: severityBreakdown.join(', '),
+    }),
     affectedPackages,
     remedy: [
-      'npm audit fix で自動修復を試行',
-      '重大な脆弱性は手動でアップデート',
-      'npm audit report で詳細を確認',
-      '修正できない場合は代替パッケージを検討',
+      t('remedy.audit-fix'),
+      t('remedy.manual-update'),
+      t('remedy.audit-report'),
+      t('remedy.consider-alternatives'),
     ],
-    impact: 'セキュリティ侵害のリスク、データ漏洩の可能性',
+    impact: t('impact.security'),
   };
 }
 
 /**
- * 症状を検出
+ * Detect symptoms
  */
 export function detectSymptoms(
   metrics: ProjectMetrics & { auditResult?: AuditResult; duplicatesList?: Duplicate[] }

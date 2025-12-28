@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DiagnosisResult } from '../types';
 import { getHealthStatus } from '../analyzer/scorer';
+import { t, getLocale } from '../i18n';
 
 /**
  * SVG Icons (Heroicons)
@@ -39,7 +40,7 @@ function createHTMLContent(result: DiagnosisResult): string {
   const status = getHealthStatus(score.overall);
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${getLocale()}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -552,11 +553,11 @@ function createHTMLContent(result: DiagnosisResult): string {
     <header>
       ${icons.hospital.replace('class="icon"', 'class="icon header-icon"')}
       <h1>Dependency Therapist</h1>
-      <p class="subtitle">Health Diagnosis Report</p>
+      <p class="subtitle">${t('healthDiagnosisReport')}</p>
     </header>
 
     <div class="score-section">
-      <div class="score-label">Overall Health Score</div>
+      <div class="score-label">${t('overallHealthScore')}</div>
       <div class="overall-score">${score.overall}<span style="font-size: 0.4em; color: var(--color-text-muted);">/100</span></div>
       <div class="status-badge">
         ${status.color === 'green' ? icons.check.replace('class="icon"', 'class="icon icon-sm"') : icons.exclamation.replace('class="icon"', 'class="icon icon-sm"')}
@@ -564,40 +565,40 @@ function createHTMLContent(result: DiagnosisResult): string {
       </div>
 
       <div class="detailed-scores">
-        ${generateScoreCard('Freshness', score.freshness, icons.clock)}
-        ${generateScoreCard('Security', score.security, icons.shield)}
-        ${generateScoreCard('Complexity', score.complexity, icons.cube)}
-        ${generateScoreCard('Maintainability', score.maintainability, icons.wrench)}
-        ${generateScoreCard('Performance', score.performance, icons.bolt)}
+        ${generateScoreCard(t('freshness'), score.freshness, icons.clock)}
+        ${generateScoreCard(t('security'), score.security, icons.shield)}
+        ${generateScoreCard(t('complexity'), score.complexity, icons.cube)}
+        ${generateScoreCard(t('maintainability'), score.maintainability, icons.wrench)}
+        ${generateScoreCard(t('performance'), score.performance, icons.bolt)}
       </div>
     </div>
 
     <div class="metrics-section">
-      <h2>${icons.chart} Project Metrics</h2>
+      <h2>${icons.chart} ${t('projectMetrics')}</h2>
       <div class="metrics-grid">
-        ${generateMetricCard('Total Dependencies', metrics.totalDependencies, icons.cube)}
-        ${generateMetricCard('Outdated Packages', metrics.outdatedCount, icons.clock)}
-        ${generateMetricCard('Deprecated Packages', metrics.deprecatedCount, icons.exclamation)}
-        ${generateMetricCard('Vulnerabilities', metrics.vulnerabilities, icons.shield)}
-        ${generateMetricCard('Average Age (months)', Math.round(metrics.averageAge / 30), icons.clock)}
-        ${generateMetricCard('Detected Symptoms', symptoms.length, icons.search)}
+        ${generateMetricCard(t('totalDependencies'), metrics.totalDependencies, icons.cube)}
+        ${generateMetricCard(t('outdatedPackages'), metrics.outdatedCount, icons.clock)}
+        ${generateMetricCard(t('deprecatedPackages'), metrics.deprecatedCount, icons.exclamation)}
+        ${generateMetricCard(t('vulnerabilities'), metrics.vulnerabilities, icons.shield)}
+        ${generateMetricCard(`${t('averageAge')} (${t('months')})`, Math.round(metrics.averageAge / 30), icons.clock)}
+        ${generateMetricCard(t('detectedSymptoms'), symptoms.length, icons.search)}
       </div>
     </div>
 
     <div class="symptoms-section">
-      <h2>${icons.search} Detected Symptoms</h2>
+      <h2>${icons.search} ${t('symptomsDetected')}</h2>
       ${symptoms.length === 0
-        ? `<div class="no-symptoms">${icons.check.replace('class="icon"', 'class="icon"')}No symptoms detected. Your project is healthy!</div>`
+        ? `<div class="no-symptoms">${icons.check.replace('class="icon"', 'class="icon"')}${t('noSymptomsDetected')}</div>`
         : symptoms.map(symptom => generateSymptomCard(symptom)).join('')
       }
     </div>
 
     <footer>
-      <p><strong>Generated:</strong> ${timestamp.toLocaleString()}</p>
-      <p><strong>Project:</strong> ${projectPath}</p>
+      <p><strong>${t('generatedAt')}:</strong> ${timestamp.toLocaleString()}</p>
+      <p><strong>${t('project')}:</strong> ${projectPath}</p>
       <div class="footer-brand">
         ${icons.hospital.replace('class="icon"', 'class="icon icon-sm"')}
-        <span>dependency-therapist - Your project's physician</span>
+        <span>dependency-therapist - ${t('yourProjectPhysician')}</span>
       </div>
     </footer>
   </div>
@@ -664,22 +665,22 @@ function generateMetricCard(label: string, value: number, icon: string): string 
  */
 function generateSymptomCard(symptom: any): string {
   return `
-    <div class="symptom ${symptom.severity}" tabindex="0" role="article" aria-label="${symptom.name}, severity: ${symptom.severity}">
+    <div class="symptom ${symptom.severity}" tabindex="0" role="article" aria-label="${symptom.name}, ${t('severity')}: ${symptom.severity}">
       <div class="symptom-header">
         <div class="symptom-name">${symptom.name}</div>
         <span class="severity-badge ${symptom.severity}">${symptom.severity}</span>
       </div>
       <div class="symptom-description">${symptom.description}</div>
-      <div class="symptom-description"><strong>Impact:</strong> ${symptom.impact}</div>
+      <div class="symptom-description"><strong>${t('impact')}:</strong> ${symptom.impact}</div>
       ${symptom.affectedPackages && symptom.affectedPackages.length > 0 ? `
         <div class="affected-packages">
-          <strong>Affected Packages:</strong><br>
+          <strong>${t('affectedPackages')}:</strong><br>
           ${symptom.affectedPackages.slice(0, 5).map((pkg: string) => `<code>${pkg}</code>`).join(' ')}
-          ${symptom.affectedPackages.length > 5 ? `<br><em style="color: var(--color-text-muted);">... and ${symptom.affectedPackages.length - 5} more</em>` : ''}
+          ${symptom.affectedPackages.length > 5 ? `<br><em style="color: var(--color-text-muted);">... ${t('andMore', { count: symptom.affectedPackages.length - 5 })}</em>` : ''}
         </div>
       ` : ''}
       <div class="remedy-section">
-        <h4>${icons.beaker.replace('class="icon"', 'class="icon icon-sm"')} Prescription</h4>
+        <h4>${icons.beaker.replace('class="icon"', 'class="icon icon-sm"')} ${t('prescription')}</h4>
         <ul class="remedy-list">
           ${symptom.remedy.map((r: string) => `<li>${r}</li>`).join('')}
         </ul>

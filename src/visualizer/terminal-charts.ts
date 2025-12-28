@@ -3,6 +3,7 @@ import asciichart from 'asciichart';
 import Chartscii from 'chartscii';
 import { Dependency, ProjectMetrics, Symptom, HealthScore } from '../types';
 import { getHealthStatus } from '../analyzer/scorer';
+import { t } from '../i18n';
 
 /**
  * 強化版スコアゲージを描画
@@ -27,7 +28,7 @@ export function drawEnhancedGauge(score: number, label: string, width: number = 
 export function drawAllScoreGauges(score: HealthScore): string {
   const lines: string[] = [];
 
-  lines.push(chalk.bold('📊 ヘルススコア可視化'));
+  lines.push(chalk.bold(`📊 ${t('healthScoreVisualization')}`));
   lines.push('─'.repeat(50));
   lines.push('');
 
@@ -39,17 +40,17 @@ export function drawAllScoreGauges(score: HealthScore): string {
   if (score.overall >= 80) overallColor = chalk.green;
   else if (score.overall >= 60) overallColor = chalk.yellow;
 
-  lines.push(chalk.bold('総合スコア:'));
+  lines.push(chalk.bold(`${t('overallScore')}:`));
   lines.push(overallColor('█'.repeat(overallFilled)) + chalk.gray('░'.repeat(overallEmpty)) + ` ${score.overall}/100 ${overallStatus.emoji} ${overallStatus.label}`);
   lines.push('');
 
   // 詳細スコア
-  lines.push(chalk.bold('詳細:'));
-  lines.push(drawEnhancedGauge(score.freshness, '  鮮度'));
-  lines.push(drawEnhancedGauge(score.security, '  セキュリティ'));
-  lines.push(drawEnhancedGauge(score.complexity, '  複雑度'));
-  lines.push(drawEnhancedGauge(score.maintainability, '  メンテナンス'));
-  lines.push(drawEnhancedGauge(score.performance, '  パフォーマンス'));
+  lines.push(chalk.bold(`${t('details')}:`));
+  lines.push(drawEnhancedGauge(score.freshness, `  ${t('freshness')}`));
+  lines.push(drawEnhancedGauge(score.security, `  ${t('security')}`));
+  lines.push(drawEnhancedGauge(score.complexity, `  ${t('complexity')}`));
+  lines.push(drawEnhancedGauge(score.maintainability, `  ${t('maintainability')}`));
+  lines.push(drawEnhancedGauge(score.performance, `  ${t('performance')}`));
 
   return lines.join('\n');
 }
@@ -64,35 +65,35 @@ export function drawAgeDistribution(dependencies: Dependency[]): string {
 
   const lines: string[] = [];
   lines.push('');
-  lines.push(chalk.bold('📈 パッケージ年齢分布'));
+  lines.push(chalk.bold(`📈 ${t('packageAgeDistribution')}`));
   lines.push('─'.repeat(50));
 
   // 年齢グループに分類
-  const groups = {
-    '0-3ヶ月': 0,
-    '3-6ヶ月': 0,
-    '6-12ヶ月': 0,
-    '1年以上': 0,
-  };
+  const groupLabels = [
+    t('age.0-3months'),
+    t('age.3-6months'),
+    t('age.6-12months'),
+    t('age.1year+'),
+  ];
+  const groupCounts = [0, 0, 0, 0];
 
   dependencies.forEach(dep => {
     const months = dep.lastUpdateDays / 30;
-    if (months < 3) groups['0-3ヶ月']++;
-    else if (months < 6) groups['3-6ヶ月']++;
-    else if (months < 12) groups['6-12ヶ月']++;
-    else groups['1年以上']++;
+    if (months < 3) groupCounts[0]++;
+    else if (months < 6) groupCounts[1]++;
+    else if (months < 12) groupCounts[2]++;
+    else groupCounts[3]++;
   });
 
   // asciichartでプロット
-  const data = Object.values(groups);
-  if (data.some(v => v > 0)) {
-    const chart = asciichart.plot(data, {
+  if (groupCounts.some(v => v > 0)) {
+    const chart = asciichart.plot(groupCounts, {
       height: 6,
       padding: '       ',
       format: (x: number) => x.toFixed(0).padStart(3),
     });
     lines.push(chart);
-    lines.push('       ' + Object.keys(groups).join('  '));
+    lines.push('       ' + groupLabels.join('  '));
   }
 
   return lines.join('\n');
@@ -104,7 +105,7 @@ export function drawAgeDistribution(dependencies: Dependency[]): string {
 export function drawSeverityBreakdown(symptoms: Symptom[]): string {
   const lines: string[] = [];
   lines.push('');
-  lines.push(chalk.bold('🏥 症状の重症度内訳'));
+  lines.push(chalk.bold(`🏥 ${t('severityBreakdown')}`));
   lines.push('─'.repeat(50));
 
   const severityCounts = {
@@ -145,15 +146,15 @@ export function drawSeverityBreakdown(symptoms: Symptom[]): string {
 export function drawDependencyStatus(metrics: ProjectMetrics): string {
   const lines: string[] = [];
   lines.push('');
-  lines.push(chalk.bold('📦 依存関係の状態'));
+  lines.push(chalk.bold(`📦 ${t('dependencyStatus')}`));
   lines.push('─'.repeat(50));
 
   const upToDate = metrics.totalDependencies - metrics.outdatedCount - metrics.deprecatedCount;
 
   const data = [
-    { label: '最新', value: Math.max(0, upToDate), color: 'green' },
-    { label: '古い', value: metrics.outdatedCount, color: 'yellow' },
-    { label: '非推奨', value: metrics.deprecatedCount, color: 'red' },
+    { label: t('upToDate'), value: Math.max(0, upToDate), color: 'green' },
+    { label: t('outdated'), value: metrics.outdatedCount, color: 'yellow' },
+    { label: t('deprecated'), value: metrics.deprecatedCount, color: 'red' },
   ];
 
   const maxValue = Math.max(...data.map(d => d.value), 1);
@@ -170,7 +171,7 @@ export function drawDependencyStatus(metrics: ProjectMetrics): string {
   // 重複情報も表示
   if (metrics.duplicates > 0) {
     lines.push('');
-    lines.push(chalk.yellow(`  重複パッケージ: ${metrics.duplicates}個`));
+    lines.push(chalk.yellow(`  ${t('duplicatePackages')}: ${metrics.duplicates}`));
   }
 
   return lines.join('\n');
@@ -187,7 +188,7 @@ export function generateCharts(
   const parts: string[] = [];
 
   parts.push('\n' + '═'.repeat(50));
-  parts.push(chalk.bold.cyan('        📊 インタラクティブ可視化'));
+  parts.push(chalk.bold.cyan(`        📊 ${t('interactiveVisualization')}`));
   parts.push('═'.repeat(50));
 
   parts.push(drawAllScoreGauges(score));

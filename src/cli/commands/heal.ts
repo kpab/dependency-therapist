@@ -3,6 +3,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { runAutoFix } from '../../healer/auto-fix';
+import { t } from '../../i18n';
 
 export function createHealCommand(): Command {
   const command = new Command('heal');
@@ -16,29 +17,29 @@ export function createHealCommand(): Command {
     .option('--skip-update', 'Skip dependency updates', false)
     .option('-y, --yes', 'Skip confirmation prompt', false)
     .action(async (options) => {
-      console.log(chalk.cyan.bold('\n🏥 Dependency Therapist - Auto Heal\n'));
+      console.log(chalk.cyan.bold(`\n🏥 ${t('autoHealTitle')}\n`));
 
       if (!options.yes && !options.dryRun) {
         const answers = await inquirer.prompt([
           {
             type: 'confirm',
             name: 'proceed',
-            message: 'This will modify your package files. Backups will be created. Continue?',
+            message: t('healConfirmMessage'),
             default: false,
           },
         ]);
 
         if (!answers.proceed) {
-          console.log(chalk.yellow('\nHealing cancelled.\n'));
+          console.log(chalk.yellow(`\n${t('healCancelled')}\n`));
           return;
         }
       }
 
       if (options.dryRun) {
-        console.log(chalk.yellow('🔍 Dry run mode - no changes will be made\n'));
+        console.log(chalk.yellow(`🔍 ${t('dryRunMode')}\n`));
       }
 
-      const spinner = ora('Analyzing and fixing issues...').start();
+      const spinner = ora(t('analyzingAndFixing')).start();
 
       try {
         const results = await runAutoFix(options.path, {
@@ -48,10 +49,10 @@ export function createHealCommand(): Command {
           skipUpdate: options.skipUpdate,
         });
 
-        spinner.succeed('Healing process completed');
+        spinner.succeed(t('healingCompleted'));
 
         // Display audit fix results
-        console.log(chalk.bold('\n📋 Security Audit Fix:'));
+        console.log(chalk.bold(`\n📋 ${t('securityAuditFix')}:`));
         if (results.audit.success) {
           results.audit.fixed.forEach(item => {
             console.log(chalk.green(`  ✓ ${item}`));
@@ -69,7 +70,7 @@ export function createHealCommand(): Command {
         }
 
         // Display update results
-        console.log(chalk.bold('\n📦 Dependency Updates:'));
+        console.log(chalk.bold(`\n📦 ${t('dependencyUpdates')}:`));
         if (results.update.success) {
           results.update.fixed.forEach(item => {
             console.log(chalk.green(`  ✓ ${item}`));
@@ -82,26 +83,26 @@ export function createHealCommand(): Command {
         }
         if (results.update.skipped.length > 0) {
           if (options.dryRun) {
-            console.log(chalk.yellow('  Would update:'));
+            console.log(chalk.yellow(`  ${t('wouldUpdate')}:`));
           }
           results.update.skipped.slice(0, 10).forEach(item => {
             console.log(chalk.gray(`    - ${item}`));
           });
           if (results.update.skipped.length > 10) {
-            console.log(chalk.gray(`    ... and ${results.update.skipped.length - 10} more`));
+            console.log(chalk.gray(`    ... ${t('andMoreItems', { count: results.update.skipped.length - 10 })}`));
           }
         }
 
         // Display next steps
-        console.log(chalk.bold('\n💡 Next Steps:'));
+        console.log(chalk.bold(`\n💡 ${t('nextStepsTitle')}:`));
         if (options.dryRun) {
-          console.log(chalk.cyan('  1. Review the changes above'));
-          console.log(chalk.cyan('  2. Run without --dry-run to apply fixes'));
-          console.log(chalk.cyan('  3. Run diagnose again to verify improvements'));
+          console.log(chalk.cyan(`  1. ${t('reviewChanges')}`));
+          console.log(chalk.cyan(`  2. ${t('runWithoutDryRun')}`));
+          console.log(chalk.cyan(`  3. ${t('runDiagnoseAgain')}`));
         } else {
-          console.log(chalk.cyan('  1. Test your application thoroughly'));
-          console.log(chalk.cyan('  2. Run diagnose again to verify improvements'));
-          console.log(chalk.cyan('  3. Commit the changes if everything works'));
+          console.log(chalk.cyan(`  1. ${t('testApplication')}`));
+          console.log(chalk.cyan(`  2. ${t('runDiagnoseAgain')}`));
+          console.log(chalk.cyan(`  3. ${t('commitChanges')}`));
         }
 
         console.log('');
@@ -111,7 +112,7 @@ export function createHealCommand(): Command {
           process.exit(1);
         }
       } catch (error) {
-        spinner.fail('Healing failed');
+        spinner.fail(t('healingFailed'));
         console.error(chalk.red((error as Error).message));
         process.exit(1);
       }

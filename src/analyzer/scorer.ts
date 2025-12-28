@@ -1,5 +1,6 @@
 import { HealthScore, ProjectMetrics, ScoreWeights, Duplicate } from '../types';
 import { AuditResult } from './security';
+import { t } from '../i18n';
 
 /**
  * スコア計算の重み付け
@@ -177,10 +178,10 @@ export function getHealthStatus(score: number): {
   color: 'green' | 'yellow' | 'red';
 } {
   if (score >= 80) {
-    return { label: '健康', emoji: '🟢', color: 'green' };
+    return { label: t('healthy'), emoji: '🟢', color: 'green' };
   } else if (score >= 60) {
-    return { label: '要注意', emoji: '🟡', color: 'yellow' };
+    return { label: t('needsAttention'), emoji: '🟡', color: 'yellow' };
   } else {
-    return { label: '不健康', emoji: '🔴', color: 'red' };
+    return { label: t('unhealthy'), emoji: '🔴', color: 'red' };
   }
 }
